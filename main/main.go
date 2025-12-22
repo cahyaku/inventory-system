@@ -96,9 +96,9 @@ func categoryMenu(categoryController *controller.CategoryController) {
 		case 2:
 			categoryController.CreateCategory()
 		case 3:
-			//editCategory()
+			categoryController.UpdateCategory()
 		case 4:
-			//removeCategory()
+			categoryController.DeleteCategory()
 		case 5:
 			return // balik ke main menu
 		default:
