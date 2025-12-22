@@ -1,6 +1,9 @@
 package repository
 
-import "inventory-system/internal/entity"
+import (
+	"errors"
+	"inventory-system/internal/entity"
+)
 
 type InMemoryCategoryRepository struct {
 	categories []entity.ItemCategory
@@ -22,31 +25,42 @@ func (repo *InMemoryCategoryRepository) FindAll() ([]entity.ItemCategory, error)
 }
 
 func (repo *InMemoryCategoryRepository) FindByID(id int) (entity.ItemCategory, error) {
-	return entity.ItemCategory{}, nil
+	for _, category := range repo.categories {
+		if category.ID == id {
+			return category, nil
+		}
+	}
+	return entity.ItemCategory{}, errors.New("Category not found!")
 }
 
 func (repo *InMemoryCategoryRepository) Save(category entity.ItemCategory) error {
+	category.ID = repo.NextID()
+	repo.nextID++
 	repo.categories = append(repo.categories, category)
 	return nil
 }
 
 func (repo *InMemoryCategoryRepository) Update(category entity.ItemCategory) error {
-	return nil
+	for i, cat := range repo.categories {
+		if cat.ID == category.ID {
+			repo.categories[i] = category
+			return nil
+		}
+	}
+	return errors.New("Category not found!")
 }
 
 func (repo *InMemoryCategoryRepository) Delete(id int) error {
-	return nil
+	for i, cat := range repo.categories {
+		if cat.ID == id {
+			repo.categories = append(repo.categories[:i], repo.categories[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("Category not found!")
 }
 
 func (repo *InMemoryCategoryRepository) NextID() int {
 	repo.nextID++
 	return repo.nextID
-}
-
-func (repo *InMemoryCategoryRepository) ResetID() {
-	repo.nextID = 0
-}
-
-func (repo *InMemoryCategoryRepository) FindByName(name string) (entity.ItemCategory, error) {
-	return entity.ItemCategory{}, nil
 }
