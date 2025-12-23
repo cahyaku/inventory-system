@@ -9,18 +9,23 @@ import (
 )
 
 type ItemController struct {
-	service *service.ItemService
+	itemService     *service.ItemService
+	categoryService *service.CategoryService
 }
 
-func NewItemController(service *service.ItemService) *ItemController {
-	return &ItemController{service: service}
+func NewItemController(itemService *service.ItemService, categoryService *service.CategoryService) *ItemController {
+	return &ItemController{
+		itemService:     itemService,
+		categoryService: categoryService,
+	}
 }
 
 func (c *ItemController) ShowItems() {
-	items, _ := c.service.GetAllItems()
+	items, _ := c.itemService.GetAllItems()
 
 	if len(items) == 0 {
 		fmt.Println("No items available.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -37,15 +42,39 @@ func (c *ItemController) ShowItems() {
 }
 
 func (c *ItemController) CreateItem() {
-	name := utils.ReadLine("Item name: ")
-	stock, err := utils.ReadInt("Initial stock: ")
+	// 1. Cek apakah kategori ada
+	categories, err := c.categoryService.GetAll()
 	if err != nil {
-		fmt.Println("Stock must be a number")
+		fmt.Println("Error:", err.Error())
 		return
 	}
 
-	fmt.Println("Select category IDs (comma separated, e.g 1,2):")
-	input := utils.ReadLine(">> ")
+	if len(categories) == 0 {
+		fmt.Println("Cannot create item.")
+		fmt.Println("No categories available (please create at least one category first).")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	// 2. Tampilkan kategori agar user tahu IDnya
+	fmt.Println("Available categories:")
+	for _, cat := range categories {
+		fmt.Printf("%d. %s\n", cat.ID, cat.Name)
+	}
+
+	// 3. Input item
+	name := utils.ReadLine("Item name: ")
+
+	// 4. Input stok awal
+	stock, err := utils.ReadInt("Initial stock: ")
+	if err != nil || stock == 0 {
+		fmt.Println("Stock must be zero or greater.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	// 5. Input kategori
+	input := utils.ReadLine("Select category IDs (comma separated, e.g 1,2):")
 
 	parts := strings.Split(input, ",")
 	var ids []int
@@ -54,16 +83,25 @@ func (c *ItemController) CreateItem() {
 		id, err := strconv.Atoi(strings.TrimSpace(part))
 		if err != nil {
 			fmt.Println("Invalid category ID:", part)
+			utils.PressEnterToContinue()
 			return
 		}
 		ids = append(ids, id)
 	}
 
-	err = c.service.CreateItem(name, stock, ids)
+	if len(ids) == 0 {
+		fmt.Println("You must select at least one category")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	// 6. Panggil service untuk CreateItem
+	err = c.itemService.CreateItem(name, stock, ids)
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		return
 	}
 
 	fmt.Println("Item created successfully ✅")
+	utils.PressEnterToContinue()
 }

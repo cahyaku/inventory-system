@@ -25,6 +25,7 @@ func (service *ItemService) CreateItem(
 	categoryIDs []int,
 ) error {
 
+	// 1. validasi basic
 	if name == "" {
 		return errors.New("item name cannot be empty")
 	}
@@ -33,11 +34,17 @@ func (service *ItemService) CreateItem(
 		return errors.New("stock cannot be negative")
 	}
 
+	if len(categoryIDs) == 0 {
+		return errors.New("item must have at least one category")
+	}
+
+	// 2. Ambil semua category
 	categories, _ := service.categoryRepo.FindAll()
 	if len(categories) == 0 {
 		return errors.New("no categories available")
 	}
 
+	// 3. Cocokan ID kategori
 	var selected []entity.ItemCategory
 	for _, id := range categoryIDs {
 		for _, c := range categories {

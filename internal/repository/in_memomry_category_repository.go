@@ -14,8 +14,8 @@ func NewInMemoryCategoryRepository() *InMemoryCategoryRepository {
 	// dummy data agar create item bisa jalan
 	return &InMemoryCategoryRepository{
 		categories: []entity.ItemCategory{
-			{ID: 1, Name: "Electronics"},
-			{ID: 2, Name: "Books"},
+			//{ID: 1, Name: "Electronics"},
+			//{ID: 2, Name: "Books"},
 		},
 	}
 }

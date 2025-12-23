@@ -19,6 +19,7 @@ func (c *CategoryController) ShowCategories() {
 
 	if len(categories) == 0 {
 		println("No categories available.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -37,6 +38,7 @@ func (c *CategoryController) CreateCategory() {
 	}
 
 	fmt.Println("Category created successfully")
+	utils.PressEnterToContinue()
 }
 
 func (c *CategoryController) UpdateCategory() {
@@ -48,6 +50,7 @@ func (c *CategoryController) UpdateCategory() {
 
 	if len(categories) == 0 {
 		fmt.Println("No categories to edit.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -59,6 +62,7 @@ func (c *CategoryController) UpdateCategory() {
 	index, err := utils.ReadInt("Select category number: ")
 	if err != nil || index < 1 || index > len(categories) {
 		fmt.Println("Invalid category number.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -71,6 +75,7 @@ func (c *CategoryController) UpdateCategory() {
 	}
 
 	fmt.Println("Category updated successfully ✅")
+	utils.PressEnterToContinue()
 }
 
 func (c *CategoryController) DeleteCategory() {
@@ -82,6 +87,7 @@ func (c *CategoryController) DeleteCategory() {
 
 	if len(categories) == 0 {
 		fmt.Println("No categories to delete.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -92,6 +98,7 @@ func (c *CategoryController) DeleteCategory() {
 	index, err := utils.ReadInt("Select category number: ")
 	if err != nil || index < 1 || index > len(categories) {
 		fmt.Println("Invalid category number.")
+		utils.PressEnterToContinue()
 		return
 	}
 
@@ -102,4 +109,5 @@ func (c *CategoryController) DeleteCategory() {
 	}
 
 	fmt.Println("Category deleted successfully 🗑️")
+	utils.PressEnterToContinue()
 }

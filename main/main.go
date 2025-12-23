@@ -16,8 +16,9 @@ func main() {
 	// Service
 	itemService := service.NewItemService(itemRepository, categoryRepository)
 	categoryService := service.NewCategoryService(categoryRepository)
+
 	// Controller
-	itemController := controller.NewItemController(itemService)
+	itemController := controller.NewItemController(itemService, categoryService)
 	categoryController := controller.NewCategoryController(categoryService)
 
 	for {
@@ -43,8 +44,7 @@ func main() {
 		case 5:
 			categoryMenu(categoryController)
 		case 6:
-			fmt.Println("Exit")
-			fmt.Println("Thank you for using this app bye byeee.... 👺")
+			fmt.Println("Thank you for using this app bye bye....👋😊")
 			return
 		default:
 			fmt.Println("Please input number between 1 and 5 👺👺👺👺👺")
@@ -86,7 +86,8 @@ func categoryMenu(categoryController *controller.CategoryController) {
 
 		input, err := utils.ReadInt("Enter your choice: ")
 		if err != nil {
-			fmt.Println("Please input number between 1 and 6 👺")
+			fmt.Println("Invalid choice (please input number between 1 and 5 👺👺👺👺👺)")
+			utils.PressEnterToContinue()
 			continue
 		}
 
@@ -100,9 +101,10 @@ func categoryMenu(categoryController *controller.CategoryController) {
 		case 4:
 			categoryController.DeleteCategory()
 		case 5:
-			return // balik ke main menu
+			return
 		default:
-			fmt.Println("Invalid choice.")
+			fmt.Println("Invalid choice (please input number between 1 and 5 👺👺👺👺👺)")
+			utils.PressEnterToContinue()
 		}
 	}
 }

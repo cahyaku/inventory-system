@@ -33,3 +33,10 @@ func ReadInt(prompt string) (int, error) {
 	input := ReadLine(prompt)
 	return strconv.Atoi(input)
 }
+
+func PressEnterToContinue() {
+	fmt.Println()
+	fmt.Print("Press Enter to continue...")
+	reader := bufio.NewReader(os.Stdin)
+	_, _ = reader.ReadString('\n')
+}
