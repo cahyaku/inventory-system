@@ -26,6 +26,7 @@ func main() {
 		input, err := utils.ReadInt("Enter your choice: ")
 		if err != nil {
 			fmt.Println("Please input number between 1 and 6 👺")
+			utils.PressEnterToContinue()
 			continue
 		}
 
@@ -48,7 +49,7 @@ func main() {
 			return
 		default:
 			fmt.Println("Please input number between 1 and 5 👺👺👺👺👺")
-			fmt.Println()
+			utils.PressEnterToContinue()
 			continue
 		}
 	}
@@ -82,6 +83,7 @@ func showCategoryMenu() {
 
 func categoryMenu(categoryController *controller.CategoryController) {
 	for {
+		fmt.Println()
 		showCategoryMenu()
 
 		input, err := utils.ReadInt("Enter your choice: ")

@@ -15,17 +15,25 @@ func NewCategoryController(service *service.CategoryService) *CategoryController
 }
 
 func (c *CategoryController) ShowCategories() {
-	categories, _ := c.service.GetAll()
-
-	if len(categories) == 0 {
-		println("No categories available.")
+	categories, err := c.service.GetAll()
+	if err != nil {
+		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
 	}
 
-	for _, category := range categories {
-		println(category.Name)
+	if len(categories) == 0 {
+		fmt.Println("No categories available!")
+		utils.PressEnterToContinue()
+		return
 	}
+
+	fmt.Println("Available Categories:")
+	for i, category := range categories {
+		fmt.Printf("%d. %s\n", i+1, category.Name)
+	}
+
+	utils.PressEnterToContinue()
 }
 
 func (c *CategoryController) CreateCategory() {
@@ -37,7 +45,7 @@ func (c *CategoryController) CreateCategory() {
 		return
 	}
 
-	fmt.Println("Category created successfully")
+	fmt.Println("Category (", name, ") created successfully")
 	utils.PressEnterToContinue()
 }
 
@@ -49,7 +57,7 @@ func (c *CategoryController) UpdateCategory() {
 	}
 
 	if len(categories) == 0 {
-		fmt.Println("No categories to edit.")
+		fmt.Println("No categories to edit!")
 		utils.PressEnterToContinue()
 		return
 	}
@@ -74,7 +82,7 @@ func (c *CategoryController) UpdateCategory() {
 		return
 	}
 
-	fmt.Println("Category updated successfully ✅")
+	fmt.Println("Category (", categories[index-1].Name, ") updated successfully ✅")
 	utils.PressEnterToContinue()
 }
 
@@ -86,7 +94,7 @@ func (c *CategoryController) DeleteCategory() {
 	}
 
 	if len(categories) == 0 {
-		fmt.Println("No categories to delete.")
+		fmt.Println("No categories to delete!")
 		utils.PressEnterToContinue()
 		return
 	}
@@ -108,6 +116,6 @@ func (c *CategoryController) DeleteCategory() {
 		return
 	}
 
-	fmt.Println("Category deleted successfully 🗑️")
+	fmt.Println("Category deleted (", categories[index-1].Name, ") successfully!")
 	utils.PressEnterToContinue()
 }
