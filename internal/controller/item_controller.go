@@ -29,6 +29,7 @@ func (c *ItemController) ShowItems() {
 		return
 	}
 
+	fmt.Println("====== Show Items =====")
 	for _, item := range items {
 		fmt.Printf("%s - Stock: %d - Categories: ", item.Name, item.Stock)
 		for i, cat := range item.Categories {
@@ -41,67 +42,185 @@ func (c *ItemController) ShowItems() {
 	}
 }
 
-func (c *ItemController) CreateItem() {
-	// 1. Cek apakah kategori ada
-	categories, err := c.categoryService.GetAll()
-	if err != nil {
-		fmt.Println("Error:", err.Error())
-		return
-	}
+/* =========================
+   CREATE ITEM
+========================= */
 
-	if len(categories) == 0 {
-		fmt.Println("Cannot create item.")
-		fmt.Println("No categories available (please create at least one category first).")
+func (c *ItemController) CreateItem() {
+	categories, err := c.categoryService.GetAll()
+	if err != nil || len(categories) == 0 {
+		fmt.Println("Cannot create item. No categories available.")
 		utils.PressEnterToContinue()
 		return
 	}
 
-	// 2. Tampilkan kategori agar user tahu IDnya
-	fmt.Println("Available categories:")
-	for _, cat := range categories {
-		fmt.Printf("%d. %s\n", cat.ID, cat.Name)
-	}
+	fmt.Println("====== Create Item =====")
 
-	// 3. Input item
 	name := utils.ReadLine("Item name: ")
 
-	// 4. Input stok awal
 	stock, err := utils.ReadInt("Initial stock: ")
-	if err != nil || stock == 0 {
+	if err != nil || stock < 0 {
 		fmt.Println("Stock must be zero or greater.")
 		utils.PressEnterToContinue()
 		return
 	}
 
-	// 5. Input kategori
-	input := utils.ReadLine("Select category IDs (comma separated, e.g 1,2):")
-
-	parts := strings.Split(input, ",")
-	var ids []int
-
-	for _, part := range parts {
-		id, err := strconv.Atoi(strings.TrimSpace(part))
-		if err != nil {
-			fmt.Println("Invalid category ID:", part)
-			utils.PressEnterToContinue()
-			return
-		}
-		ids = append(ids, id)
-	}
-
-	if len(ids) == 0 {
-		fmt.Println("You must select at least one category")
+	ids, err := c.readCategoryIDs()
+	if err != nil {
+		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
 	}
 
-	// 6. Panggil service untuk CreateItem
-	err = c.itemService.CreateItem(name, stock, ids)
+	err = c.itemService.Create(name, stock, ids)
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		utils.PressEnterToContinue()
+		return
+	}
+
+	fmt.Println("Item (", name, ") created successfully ✅")
+	utils.PressEnterToContinue()
+}
+
+/* =========================
+   UPDATE ITEM
+========================= */
+
+func (c *ItemController) UpdateItem() {
+	items, _ := c.itemService.GetAllItems()
+	if len(items) == 0 {
+		fmt.Println("No items available.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	fmt.Println("====== Update Item =====")
+	for i, item := range items {
+		fmt.Printf("%d. %s (Stock: %d)\n", i+1, item.Name, item.Stock)
+	}
+
+	index, err := utils.ReadInt("Select item number: ")
+	if err != nil || index < 1 || index > len(items) {
+		fmt.Println("Invalid item number.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	item := items[index-1]
+
+	newName := utils.ReadLine("New item name: ")
+	newStock, err := utils.ReadInt("New stock: ")
+	if err != nil || newStock < 0 {
+		fmt.Println("Stock must be zero or greater.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	ids, err := c.readCategoryIDs()
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		utils.PressEnterToContinue()
+		return
+	}
+
+	err = c.itemService.Update(item.ID, newName, newStock, ids)
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		utils.PressEnterToContinue()
+		return
+	}
+
+	fmt.Println("Item updated successfully ✅")
+	utils.PressEnterToContinue()
+}
+
+func (c *ItemController) DeleteItem() {
+	items, err := c.itemService.GetAllItems()
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		return
 	}
 
-	fmt.Println("Item created successfully ✅")
+	if len(items) == 0 {
+		fmt.Println("No items to delete.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	fmt.Println("====== Delete Item =====")
+	for i, item := range items {
+		fmt.Printf("%d. %s\n", i+1, item.Name)
+	}
+
+	index, err := utils.ReadInt("Select item number: ")
+	if err != nil || index < 1 || index > len(items) {
+		fmt.Println("Invalid item number.")
+		utils.PressEnterToContinue()
+		return
+	}
+
+	err = c.itemService.Delete(items[index-1].ID)
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		utils.PressEnterToContinue()
+		return
+	}
+
+	fmt.Println("Item deleted successfully!")
 	utils.PressEnterToContinue()
+}
+
+/* =========================
+   HELPER: READ CATEGORY IDS
+========================= */
+
+func (c *ItemController) readCategoryIDs() ([]int, error) {
+	categories, err := c.categoryService.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(categories) == 0 {
+		return nil, fmt.Errorf("no categories available")
+	}
+
+	fmt.Println("Available categories:")
+	for i, cat := range categories {
+		fmt.Printf("%d. %s\n", i+1, cat.Name)
+	}
+
+	input := utils.ReadLine("Select category numbers (comma separated, e.g 1,2,3): ")
+	parts := strings.Split(input, ",")
+
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("you must select at least one category")
+	}
+
+	var ids []int
+	selected := make(map[int]bool)
+
+	for _, part := range parts {
+		index, err := strconv.Atoi(strings.TrimSpace(part))
+		if err != nil {
+			return nil, fmt.Errorf("invalid category number: %s", part)
+		}
+
+		// VALIDASI INDEX (1-based → 0-based)
+		if index < 1 || index > len(categories) {
+			return nil, fmt.Errorf("category number %d is out of range", index)
+		}
+
+		realID := categories[index-1].ID
+
+		// Cegah duplikat
+		if selected[realID] {
+			return nil, fmt.Errorf("duplicate category selection: %d", index)
+		}
+
+		selected[realID] = true
+		ids = append(ids, realID)
+	}
+
+	return ids, nil
 }

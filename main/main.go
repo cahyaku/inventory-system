@@ -32,15 +32,16 @@ func main() {
 
 		switch input {
 		case 1:
-			fmt.Println("====== Show tasks =====")
 			itemController.ShowItems()
 			fmt.Println()
 		case 2:
 			itemController.CreateItem()
 			fmt.Println()
 		case 3:
+			itemController.UpdateItem()
 			fmt.Println()
 		case 4:
+			itemController.DeleteItem()
 			fmt.Println()
 		case 5:
 			categoryMenu(categoryController)

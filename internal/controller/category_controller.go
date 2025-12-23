@@ -28,7 +28,7 @@ func (c *CategoryController) ShowCategories() {
 		return
 	}
 
-	fmt.Println("Available Categories:")
+	fmt.Println("--------Available Categories--------")
 	for i, category := range categories {
 		fmt.Printf("%d. %s\n", i+1, category.Name)
 	}
@@ -37,6 +37,7 @@ func (c *CategoryController) ShowCategories() {
 }
 
 func (c *CategoryController) CreateCategory() {
+	fmt.Println("--------Create Category--------")
 	name := utils.ReadLine("Category name: ")
 
 	err := c.service.Create(name)
@@ -62,6 +63,7 @@ func (c *CategoryController) UpdateCategory() {
 		return
 	}
 
+	fmt.Println("--------Update Categories--------")
 	// tampilkan list
 	for i, cat := range categories {
 		fmt.Printf("%d. %s\n", i+1, cat.Name)
@@ -99,6 +101,7 @@ func (c *CategoryController) DeleteCategory() {
 		return
 	}
 
+	fmt.Println("--------Delete Categories--------")
 	for i, cat := range categories {
 		fmt.Printf("%d. %s\n", i+1, cat.Name)
 	}
