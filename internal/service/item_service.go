@@ -26,7 +26,7 @@ func (service *ItemService) Create(
 	categoryIDs []int,
 ) error {
 
-	// 1. validasi basic
+	// Simple validation
 	if name == "" {
 		return errors.New("item name cannot be empty")
 	}
@@ -35,47 +35,16 @@ func (service *ItemService) Create(
 		return errors.New("stock cannot be negative")
 	}
 
-	if len(categoryIDs) == 0 {
-		return errors.New("item must have at least one category")
-	}
-
-	// 2. Ambil semua category
-
-	categories, _ := service.categoryRepo.FindAll()
-	if len(categories) == 0 {
-		return errors.New("no categories available")
-	}
-
-	categoryMap := make(map[int]entity.ItemCategory)
-	for _, cat := range categories {
-		categoryMap[cat.ID] = cat
-	}
-
-	// Validasi category
-	var selected []entity.ItemCategory
-	seen := make(map[int]bool)
-
-	for _, id := range categoryIDs {
-		category, exists := categoryMap[id]
-		if !exists {
-			return errors.New("Invalid category ID: " + strconv.Itoa(id))
-		}
-		if seen[id] {
-			return errors.New("duplicate category ID: " + strconv.Itoa(id))
-		}
-		seen[id] = true
-		selected = append(selected, category)
-	}
-
-	if len(selected) == 0 {
-		return errors.New("item must have at least one category")
+	// reusable category validation
+	categories, err := service.validateAndGetCategories(categoryIDs)
+	if err != nil {
+		return err
 	}
 
 	item := entity.Item{
-		//ID:         len(categories) + 1,
 		Name:       name,
 		Stock:      stock,
-		Categories: selected,
+		Categories: categories,
 	}
 
 	return service.itemRepo.Save(item)
@@ -96,13 +65,13 @@ func (service *ItemService) Update(
 	categoryIDs []int,
 ) error {
 
-	// 1. Ambil item lama
+	// Take data item by ID
 	item, err := service.itemRepo.FindByID(itemID)
 	if err != nil {
 		return err
 	}
 
-	// 2. Validasi
+	// simple validation
 	if name == "" {
 		return errors.New("item name cannot be empty")
 	}
@@ -111,43 +80,18 @@ func (service *ItemService) Update(
 		return errors.New("stock cannot be negative")
 	}
 
-	if len(categoryIDs) == 0 {
-		return errors.New("item must have at least one category")
+	// reusable category validation
+	categories, err := service.validateAndGetCategories(categoryIDs)
+	if err != nil {
+		return err
 	}
 
-	// 3. Ambil semua kategori
-	categories, _ := service.categoryRepo.FindAll()
-	if len(categories) == 0 {
-		return errors.New("no categories available")
-	}
-
-	// 4. Map kategori untuk validasi cepat
-	categoryMap := make(map[int]entity.ItemCategory)
-	for _, c := range categories {
-		categoryMap[c.ID] = c
-	}
-
-	var selected []entity.ItemCategory
-	seen := make(map[int]bool)
-
-	for _, id := range categoryIDs {
-		cat, exists := categoryMap[id]
-		if !exists {
-			return errors.New("invalid category ID: " + strconv.Itoa(id))
-		}
-		if seen[id] {
-			return errors.New("duplicate category ID: " + strconv.Itoa(id))
-		}
-		seen[id] = true
-		selected = append(selected, cat)
-	}
-
-	// 5. Update data item
+	// Update data item
 	item.Name = name
 	item.Stock = stock
-	item.Categories = selected
+	item.Categories = categories
 
-	// 6. Simpan
+	// Save data item
 	return service.itemRepo.Update(item)
 }
 
@@ -157,4 +101,41 @@ func (service *ItemService) Delete(id int) error {
 		return err
 	}
 	return service.itemRepo.Delete(id)
+}
+
+func (service *ItemService) validateAndGetCategories(categoryIDs []int) ([]entity.ItemCategory, error) {
+	if len(categoryIDs) == 0 {
+		return nil, errors.New("item must have at least one category")
+	}
+
+	categories, err := service.categoryRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(categories) == 0 {
+		return nil, errors.New("no categories available")
+	}
+
+	categoryMap := make(map[int]entity.ItemCategory)
+	for _, cat := range categories {
+		categoryMap[cat.ID] = cat
+	}
+
+	// Validate category
+	var selected []entity.ItemCategory
+	seen := make(map[int]bool)
+
+	for _, id := range categoryIDs {
+		category, exists := categoryMap[id]
+		if !exists {
+			return nil, errors.New("Invalid category ID: " + strconv.Itoa(id))
+		}
+		if seen[id] {
+			return nil, errors.New("duplicate category ID: " + strconv.Itoa(id))
+		}
+		seen[id] = true
+		selected = append(selected, category)
+	}
+	return selected, nil
 }
