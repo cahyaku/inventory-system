@@ -55,7 +55,6 @@ func (c *ItemController) CreateItem() {
 	}
 
 	fmt.Println("====== Create Item =====")
-
 	name := utils.ReadLine("Item name: ")
 
 	stock, err := utils.ReadInt("Initial stock: ")
@@ -90,7 +89,7 @@ func (c *ItemController) CreateItem() {
 func (c *ItemController) UpdateItem() {
 	items, _ := c.itemService.GetAllItems()
 	if len(items) == 0 {
-		fmt.Println("No items available.")
+		fmt.Println("No items to update.")
 		utils.PressEnterToContinue()
 		return
 	}
@@ -167,7 +166,7 @@ func (c *ItemController) DeleteItem() {
 		return
 	}
 
-	fmt.Println("Item deleted successfully!")
+	fmt.Println("Item deleted successfully ✅")
 	utils.PressEnterToContinue()
 }
 
@@ -185,6 +184,7 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 		return nil, fmt.Errorf("no categories available")
 	}
 
+	fmt.Println("---------------------")
 	fmt.Println("Available categories:")
 	for i, cat := range categories {
 		fmt.Printf("%d. %s\n", i+1, cat.Name)

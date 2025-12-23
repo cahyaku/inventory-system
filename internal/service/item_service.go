@@ -40,6 +40,7 @@ func (service *ItemService) Create(
 	}
 
 	// 2. Ambil semua category
+
 	categories, _ := service.categoryRepo.FindAll()
 	if len(categories) == 0 {
 		return errors.New("no categories available")
@@ -49,6 +50,7 @@ func (service *ItemService) Create(
 	for _, cat := range categories {
 		categoryMap[cat.ID] = cat
 	}
+
 	// Validasi category
 	var selected []entity.ItemCategory
 	seen := make(map[int]bool)
