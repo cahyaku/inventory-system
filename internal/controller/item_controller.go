@@ -44,6 +44,7 @@ func (c *ItemController) ShowItems() {
 		}
 		fmt.Println()
 	}
+	utils.PressEnterToContinue()
 }
 
 func (c *ItemController) CreateItem() {
@@ -187,21 +188,35 @@ func (c *ItemController) selectItem(prompt string) (*entity.Item, error) {
 		return nil, fmt.Errorf("invalid item number")
 	}
 
+	fmt.Println("DEBUG ITEM ID:", items[index-1].ID)
+
 	return &items[index-1], nil
 }
 
 func (c *ItemController) readItemInput() (string, int, []int, error) {
 	name := utils.ReadLine("Item name: ")
-
-	stock, err := utils.ReadInt("Stock: ")
-	if err != nil || stock < 0 {
-		return "", 0, nil, fmt.Errorf("stock must be zero or greater")
-	}
-
-	categoryIDs, err := c.readCategoryIDs()
-	if err != nil {
-		return "", 0, nil, err
-	}
+	stock := readValidStock()
+	categoryIDs := c.readCategoryInput()
 
 	return name, stock, categoryIDs, nil
+}
+
+func readValidStock() int {
+	for {
+		stock, err := utils.ReadInt("Stock: ")
+		if err == nil && stock >= 0 {
+			return stock
+		}
+		fmt.Println("Stock must be zero or greater. Please try again.")
+	}
+}
+
+func (c *ItemController) readCategoryInput() []int {
+	for {
+		ids, err := c.readCategoryIDs()
+		if err == nil {
+			return ids
+		}
+		fmt.Println("Invalid category selection. Please try again.", err.Error())
+	}
 }

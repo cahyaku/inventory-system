@@ -50,7 +50,11 @@ func (repo *InMemoryItemRepository) Update(item entity.Item) error {
 }
 
 func (repo *InMemoryItemRepository) Delete(id int) error {
-
-	repo.items = append(repo.items[:id-1], repo.items[id:]...)
-	return nil
+	for i, item := range repo.items {
+		if item.ID == id {
+			repo.items = append(repo.items[:i], repo.items[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("item not found")
 }

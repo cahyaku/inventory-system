@@ -35,6 +35,17 @@ func (service *ItemService) Create(
 		return errors.New("stock cannot be negative")
 	}
 
+	items, err := service.itemRepo.FindAll()
+	if err != nil {
+		return err
+	}
+
+	for _, item := range items {
+		if item.Name == name {
+			return errors.New("item already exists")
+		}
+	}
+
 	// reusable category validation
 	categories, err := service.validateAndGetCategories(categoryIDs)
 	if err != nil {
@@ -70,6 +81,17 @@ func (service *ItemService) Update(
 
 	if stock < 0 {
 		return errors.New("stock cannot be negative")
+	}
+
+	items, err := service.itemRepo.FindAll()
+	if err != nil {
+		return err
+	}
+
+	for _, item := range items {
+		if item.Name == name && item.ID != itemID {
+			return errors.New("item already exists")
+		}
 	}
 
 	// reusable category validation
