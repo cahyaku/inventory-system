@@ -2,17 +2,20 @@ package controller
 
 import (
 	"fmt"
+	"inventory-system/internal/entity"
 	"inventory-system/internal/service"
 	"inventory-system/internal/utils"
 	"strconv"
 	"strings"
 )
 
+// ItemController handles operations related to managing items and their associated categories.
 type ItemController struct {
 	itemService     *service.ItemService
 	categoryService *service.CategoryService
 }
 
+// NewItemController initializes and returns a new ItemController with the provided item and category services.
 func NewItemController(itemService *service.ItemService, categoryService *service.CategoryService) *ItemController {
 	return &ItemController{
 		itemService:     itemService,
@@ -20,6 +23,7 @@ func NewItemController(itemService *service.ItemService, categoryService *servic
 	}
 }
 
+// ShowItems retrieves and displays all available items. If no items are found, a message is displayed instead.
 func (c *ItemController) ShowItems() {
 	items, _ := c.itemService.GetAllItems()
 
@@ -42,10 +46,6 @@ func (c *ItemController) ShowItems() {
 	}
 }
 
-/* =========================
-   CREATE ITEM
-========================= */
-
 func (c *ItemController) CreateItem() {
 	categories, err := c.categoryService.GetAll()
 	if err != nil || len(categories) == 0 {
@@ -55,24 +55,16 @@ func (c *ItemController) CreateItem() {
 	}
 
 	fmt.Println("====== Create Item =====")
-	name := utils.ReadLine("Item name: ")
 
-	stock, err := utils.ReadInt("Initial stock: ")
-	if err != nil || stock < 0 {
-		fmt.Println("Stock must be zero or greater.")
-		utils.PressEnterToContinue()
-		return
-	}
-
-	ids, err := c.readCategoryIDs()
+	// Baca input user dan parsing
+	name, stock, ids, err := c.readItemInput()
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
 	}
 
-	err = c.itemService.Create(name, stock, ids)
-	if err != nil {
+	if err := c.itemService.Create(name, stock, ids); err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
@@ -82,49 +74,22 @@ func (c *ItemController) CreateItem() {
 	utils.PressEnterToContinue()
 }
 
-/* =========================
-   UPDATE ITEM
-========================= */
-
 func (c *ItemController) UpdateItem() {
-	items, _ := c.itemService.GetAllItems()
-	if len(items) == 0 {
-		fmt.Println("No items to update.")
-		utils.PressEnterToContinue()
-		return
-	}
-
-	fmt.Println("====== Update Item =====")
-	for i, item := range items {
-		fmt.Printf("%d. %s (Stock: %d)\n", i+1, item.Name, item.Stock)
-	}
-
-	index, err := utils.ReadInt("Select item number: ")
-	if err != nil || index < 1 || index > len(items) {
-		fmt.Println("Invalid item number.")
-		utils.PressEnterToContinue()
-		return
-	}
-
-	item := items[index-1]
-
-	newName := utils.ReadLine("New item name: ")
-	newStock, err := utils.ReadInt("New stock: ")
-	if err != nil || newStock < 0 {
-		fmt.Println("Stock must be zero or greater.")
-		utils.PressEnterToContinue()
-		return
-	}
-
-	ids, err := c.readCategoryIDs()
+	item, err := c.selectItem("====== Update Item =====")
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
 	}
 
-	err = c.itemService.Update(item.ID, newName, newStock, ids)
+	name, stock, ids, err := c.readItemInput()
 	if err != nil {
+		fmt.Println("Error:", err.Error())
+		utils.PressEnterToContinue()
+		return
+	}
+
+	if err := c.itemService.Update(item.ID, name, stock, ids); err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
@@ -135,32 +100,14 @@ func (c *ItemController) UpdateItem() {
 }
 
 func (c *ItemController) DeleteItem() {
-	items, err := c.itemService.GetAllItems()
+	item, err := c.selectItem("====== Delete Item =====")
 	if err != nil {
 		fmt.Println("Error:", err.Error())
-		return
-	}
-
-	if len(items) == 0 {
-		fmt.Println("No items to delete.")
 		utils.PressEnterToContinue()
 		return
 	}
 
-	fmt.Println("====== Delete Item =====")
-	for i, item := range items {
-		fmt.Printf("%d. %s\n", i+1, item.Name)
-	}
-
-	index, err := utils.ReadInt("Select item number: ")
-	if err != nil || index < 1 || index > len(items) {
-		fmt.Println("Invalid item number.")
-		utils.PressEnterToContinue()
-		return
-	}
-
-	err = c.itemService.Delete(items[index-1].ID)
-	if err != nil {
+	if err := c.itemService.Delete(item.ID); err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
 		return
@@ -169,10 +116,6 @@ func (c *ItemController) DeleteItem() {
 	fmt.Println("Item deleted successfully ✅")
 	utils.PressEnterToContinue()
 }
-
-/* =========================
-   HELPER: READ CATEGORY IDS
-========================= */
 
 func (c *ItemController) readCategoryIDs() ([]int, error) {
 	categories, err := c.categoryService.GetAll()
@@ -198,7 +141,7 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 	}
 
 	var ids []int
-	selected := make(map[int]bool)
+	selected := make(map[int]bool) // agar input tidak duplikat
 
 	for _, part := range parts {
 		index, err := strconv.Atoi(strings.TrimSpace(part))
@@ -206,7 +149,7 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 			return nil, fmt.Errorf("invalid category number: %s", part)
 		}
 
-		// VALIDASI INDEX (1-based → 0-based)
+		// VALIDASI INDEX range
 		if index < 1 || index > len(categories) {
 			return nil, fmt.Errorf("category number %d is out of range", index)
 		}
@@ -223,4 +166,42 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 	}
 
 	return ids, nil
+}
+
+func (c *ItemController) selectItem(prompt string) (*entity.Item, error) {
+	items, err := c.itemService.GetAllItems()
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, fmt.Errorf("no items available")
+	}
+
+	fmt.Println(prompt)
+	for i, item := range items {
+		fmt.Printf("%d. %s (Stock: %d)\n", i+1, item.Name, item.Stock)
+	}
+
+	index, err := utils.ReadInt("Select item number: ")
+	if err != nil || index < 1 || index > len(items) {
+		return nil, fmt.Errorf("invalid item number")
+	}
+
+	return &items[index-1], nil
+}
+
+func (c *ItemController) readItemInput() (string, int, []int, error) {
+	name := utils.ReadLine("Item name: ")
+
+	stock, err := utils.ReadInt("Stock: ")
+	if err != nil || stock < 0 {
+		return "", 0, nil, fmt.Errorf("stock must be zero or greater")
+	}
+
+	categoryIDs, err := c.readCategoryIDs()
+	if err != nil {
+		return "", 0, nil, err
+	}
+
+	return name, stock, categoryIDs, nil
 }

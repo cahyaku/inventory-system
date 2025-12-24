@@ -35,7 +35,6 @@ func (repo *InMemoryCategoryRepository) FindByID(id int) (entity.ItemCategory, e
 
 func (repo *InMemoryCategoryRepository) Save(category entity.ItemCategory) error {
 	category.ID = repo.NextID()
-	repo.nextID++
 	repo.categories = append(repo.categories, category)
 	return nil
 }
