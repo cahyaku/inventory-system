@@ -34,8 +34,8 @@ func (c *ItemController) ShowItems() {
 	}
 
 	fmt.Println("====== Show Items =====")
-	for _, item := range items {
-		fmt.Printf("%s - Stock: %d - Categories: ", item.Name, item.Stock)
+	for i, item := range items {
+		fmt.Printf("%d. %s - Stock: %d - Categories: ", i+1, item.Name, item.Stock)
 		for i, cat := range item.Categories {
 			if i > 0 {
 				fmt.Print(", ")
@@ -133,7 +133,7 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 		fmt.Printf("%d. %s\n", i+1, cat.Name)
 	}
 
-	input := utils.ReadLine("Select category numbers (comma separated, e.g 1,2,3): ")
+	input := utils.ReadLine("Select category numbers (comma separated, e.g 1,2,3...): ")
 	parts := strings.Split(input, ",")
 
 	if len(parts) == 0 {

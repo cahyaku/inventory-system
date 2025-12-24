@@ -50,14 +50,6 @@ func (service *ItemService) Create(
 	return service.itemRepo.Save(item)
 }
 
-func (service *ItemService) GetByID(id int) (entity.Item, error) {
-	return service.itemRepo.FindByID(id)
-}
-
-func (service *ItemService) Save(item entity.Item) error {
-	return service.itemRepo.Save(item)
-}
-
 func (service *ItemService) Update(
 	itemID int,
 	name string,
