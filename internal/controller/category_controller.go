@@ -78,6 +78,11 @@ func (c *CategoryController) UpdateCategory() {
 
 	newName := utils.ReadLine("New category name: ")
 
+	if !utils.Confirm("Are you sure want to update category?") {
+		fmt.Println("Edit category cancelled.")
+		return
+	}
+
 	err = c.service.Update(categories[index-1].ID, newName)
 	if err != nil {
 		fmt.Println("Error:", err.Error())
@@ -110,6 +115,11 @@ func (c *CategoryController) DeleteCategory() {
 	if err != nil || index < 1 || index > len(categories) {
 		fmt.Println("Invalid category number.")
 		utils.PressEnterToContinue()
+		return
+	}
+
+	if !utils.Confirm("Are you sure want to delete category?") {
+		fmt.Println("Delete category cancelled")
 		return
 	}
 

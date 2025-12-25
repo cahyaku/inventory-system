@@ -90,6 +90,11 @@ func (c *ItemController) UpdateItem() {
 		return
 	}
 
+	if !utils.Confirm("Are you sure want to update item?") {
+		fmt.Println("Edit item cancelled")
+		return
+	}
+
 	if err := c.itemService.Update(item.ID, name, stock, ids); err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
@@ -105,6 +110,11 @@ func (c *ItemController) DeleteItem() {
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		utils.PressEnterToContinue()
+		return
+	}
+
+	if !utils.Confirm("Are you sure want to delete item?") {
+		fmt.Println("Delete item cancelled")
 		return
 	}
 
@@ -174,21 +184,26 @@ func (c *ItemController) selectItem(prompt string) (*entity.Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if len(items) == 0 {
 		return nil, fmt.Errorf("no items available")
 	}
 
 	fmt.Println(prompt)
 	for i, item := range items {
-		fmt.Printf("%d. %s (Stock: %d)\n", i+1, item.Name, item.Stock)
+		var categories []string
+		for _, cat := range item.Categories {
+			categories = append(categories, cat.Name)
+		}
+		fmt.Printf("%d. %s (Stock: %d) Categories: %s\n", i+1, item.Name, item.Stock, strings.Join(categories, ", "))
 	}
 
 	index, err := utils.ReadInt("Select item number: ")
 	if err != nil || index < 1 || index > len(items) {
-		return nil, fmt.Errorf("invalid item number")
+		return nil, fmt.Errorf("item number %d is out of range", index)
 	}
 
-	fmt.Println("DEBUG ITEM ID:", items[index-1].ID)
+	//fmt.Println("DEBUG ITEM ID:", items[index-1].ID)
 
 	return &items[index-1], nil
 }

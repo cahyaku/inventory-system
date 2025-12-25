@@ -40,3 +40,22 @@ func PressEnterToContinue() {
 	reader := bufio.NewReader(os.Stdin)
 	_, _ = reader.ReadString('\n')
 }
+
+// Confirm menampilkan pertanyaan konfirmasi (y/n)
+// return true jika user setuju, false jika batal
+func Confirm(prompt string) bool {
+	for {
+		fmt.Printf("%s (y/n): ", prompt)
+		input, _ := reader.ReadString('\n')
+		input = strings.ToLower(strings.TrimSpace(input))
+
+		switch input {
+		case "y", "yes":
+			return true
+		case "n", "no":
+			return false
+		default:
+			fmt.Println("Input tidak valid. Masukkan y atau n.")
+		}
+	}
+}
