@@ -8,4 +8,5 @@ type ItemRepository interface {
 	Save(item entity.Item) error
 	Update(item entity.Item) error
 	Delete(id int) error
+	CountByCategoryID(categoryID int) (int, error)
 }

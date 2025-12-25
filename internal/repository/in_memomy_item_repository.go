@@ -58,3 +58,18 @@ func (repo *InMemoryItemRepository) Delete(id int) error {
 	}
 	return errors.New("item not found")
 }
+
+func (repo *InMemoryItemRepository) CountByCategoryID(categoryID int) (int, error) {
+	count := 0
+
+	for _, item := range repo.items {
+		for _, cat := range item.Categories {
+			if cat.ID == categoryID {
+				count++
+				break // hindari double count
+			}
+		}
+	}
+
+	return count, nil
+}

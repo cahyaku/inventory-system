@@ -15,7 +15,7 @@ func main() {
 
 	// Service
 	itemService := service.NewItemService(itemRepository, categoryRepository)
-	categoryService := service.NewCategoryService(categoryRepository)
+	categoryService := service.NewCategoryService(categoryRepository, itemRepository)
 
 	// Controller
 	itemController := controller.NewItemController(itemService, categoryService)

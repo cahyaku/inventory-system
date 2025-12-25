@@ -9,10 +9,14 @@ import (
 
 type CategoryService struct {
 	categoryRepository repository.ItemCategoryRepository
+	itemRepository     repository.ItemRepository
 }
 
-func NewCategoryService(categoryRepository repository.ItemCategoryRepository) *CategoryService {
-	return &CategoryService{categoryRepository}
+// ini nambah itemRepository untuk cek apakah categori udah dipakai pada items?
+func NewCategoryService(
+	categoryRepository repository.ItemCategoryRepository,
+	itemRepository repository.ItemRepository) *CategoryService {
+	return &CategoryService{categoryRepository, itemRepository}
 }
 
 func (service *CategoryService) GetAll() ([]entity.ItemCategory, error) {
@@ -42,6 +46,11 @@ func (service *CategoryService) Create(name string) error {
 func (service *CategoryService) Update(id int, name string) error {
 	if name == "" {
 		return errors.New("category name cannot be empty")
+	}
+
+	// cek apakah kategori masih bisa diubah
+	if !service.CanModify(id) {
+		return errors.New("category cannot be edited because it is used by items")
 	}
 
 	// pastikan categori ada
@@ -74,5 +83,16 @@ func (service *CategoryService) Update(id int, name string) error {
 }
 
 func (service *CategoryService) Delete(id int) error {
+	// cek apakah kategori masih bisa dihapus
+	if !service.CanModify(id) {
+		return errors.New("category cannot be edited because it is used by items")
+	}
+
 	return service.categoryRepository.Delete(id)
+}
+
+// CanModify untuk cek apakah categori sudah dipakai pada item
+func (service *CategoryService) CanModify(categoryID int) bool {
+	count, _ := service.itemRepository.CountByCategoryID(categoryID)
+	return count == 0
 }
