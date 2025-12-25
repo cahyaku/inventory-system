@@ -37,16 +37,26 @@ func (repo *InMemoryItemRepository) Save(item entity.Item) error {
 	return nil
 }
 
+//func (repo *InMemoryItemRepository) Update(item entity.Item) error {
+//	//repo.items[item.ID-1] = item
+//	for i, it := range repo.items {
+//		if it.ID == item.ID {
+//			repo.items[i] = item
+//			return nil
+//		}
+//		return errors.New("item not found")
+//	}
+//	return nil
+//}
+
 func (repo *InMemoryItemRepository) Update(item entity.Item) error {
-	//repo.items[item.ID-1] = item
 	for i, it := range repo.items {
 		if it.ID == item.ID {
 			repo.items[i] = item
 			return nil
 		}
-		return errors.New("item not found")
 	}
-	return nil
+	return errors.New("item not found")
 }
 
 func (repo *InMemoryItemRepository) Delete(id int) error {
