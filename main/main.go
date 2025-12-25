@@ -9,15 +9,15 @@ import (
 )
 
 func main() {
-	// Repository
+	// Repository (sumber data in-memori) karena data disimpan di ram
 	itemRepository := repository.NewInMemoryItemRepository()
 	categoryRepository := repository.NewInMemoryCategoryRepository()
 
-	// Service
+	// Service (menggunakan repository) untuk membuat business logic layer
 	itemService := service.NewItemService(itemRepository, categoryRepository)
 	categoryService := service.NewCategoryService(categoryRepository, itemRepository)
 
-	// Controller
+	// Controller (menghubungkan service dengan user) CLI
 	itemController := controller.NewItemController(itemService, categoryService)
 	categoryController := controller.NewCategoryController(categoryService)
 
@@ -73,6 +73,9 @@ func showMainMenu() {
 	fmt.Println("6. Exit")
 }
 
+/**
+ * Function to display categories menu
+ */
 func showCategoryMenu() {
 	fmt.Println("══════════════ CATEGORY MANAGEMENT ══════════════")
 	fmt.Println("1. Show categories")

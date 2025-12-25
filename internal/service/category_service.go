@@ -91,8 +91,10 @@ func (service *CategoryService) Delete(id int) error {
 	return service.categoryRepository.Delete(id)
 }
 
-// CanModify untuk cek apakah categori sudah dipakai pada item
+// CanModify meminta hasil hitung ke repository, mengambil angka count
+// kemudian membandingkan hasilnya.
+// Initinya untuk cek apakah categori sudah dipakai pada item
 func (service *CategoryService) CanModify(categoryID int) bool {
 	count, _ := service.itemRepository.CountByCategoryID(categoryID)
-	return count == 0
+	return count == 0 // Jika countnya 0 = true (category bisa di edit / delete)
 }
