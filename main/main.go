@@ -49,7 +49,7 @@ func main() {
 			fmt.Println("Thank you for using this app bye bye....👋😊")
 			return
 		default:
-			fmt.Println("Please input number between 1 and 5 👺👺👺👺👺")
+			fmt.Println("Please input number between 1 and 6 👺👺👺👺👺")
 			utils.PressEnterToContinue()
 			continue
 		}
