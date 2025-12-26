@@ -9,7 +9,8 @@ import (
 
 type CategoryService struct {
 	categoryRepository repository.ItemCategoryRepository
-	itemRepository     repository.ItemRepository
+	itemRepository     repository.ItemRepository // ini dipakai
+	// kalau sudah dipakai, maka tidak bisa diubah atau dihapus.
 }
 
 // ini nambah itemRepository untuk cek apakah categori udah dipakai pada items?
@@ -19,10 +20,12 @@ func NewCategoryService(
 	return &CategoryService{categoryRepository, itemRepository}
 }
 
+// GetAll mengambil semua kategori
 func (service *CategoryService) GetAll() ([]entity.ItemCategory, error) {
 	return service.categoryRepository.FindAll()
 }
 
+// Create menambahkan kategori baru
 func (service *CategoryService) Create(name string) error {
 	if name == "" {
 		return errors.New("category name cannot be empty")
@@ -34,6 +37,8 @@ func (service *CategoryService) Create(name string) error {
 	}
 
 	for _, cat := range categories {
+		// strings.EqualFold() membuat perbandingan tidak case-insensitive
+		// ex. "Food" == "food" == "FOOD"
 		if strings.EqualFold(cat.Name, name) {
 			return errors.New("category already exists")
 		}
@@ -43,6 +48,7 @@ func (service *CategoryService) Create(name string) error {
 	return service.categoryRepository.Save(category)
 }
 
+// Update mengubah nama kategori
 func (service *CategoryService) Update(id int, name string) error {
 	if name == "" {
 		return errors.New("category name cannot be empty")
@@ -70,6 +76,7 @@ func (service *CategoryService) Update(id int, name string) error {
 		return err
 	}
 
+	// (agar kategori tidak punya nama sama)
 	for _, cat := range categories {
 		if strings.EqualFold(cat.Name, name) {
 			return errors.New("category already exists")
@@ -82,6 +89,7 @@ func (service *CategoryService) Update(id int, name string) error {
 	})
 }
 
+// Delete menghapus kategori
 func (service *CategoryService) Delete(id int) error {
 	// cek apakah kategori masih bisa dihapus
 	if !service.CanModify(id) {
