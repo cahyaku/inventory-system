@@ -6,6 +6,7 @@ import "inventory-system/internal/entity"
 // Jadi ini mendefiniskan apa yang bisa dilakukan ke data ItemCategory, tanpa peduli cara menyimpanya.
 // ItemCategoryRepository digunakan agar service tidak bergantung pada implementasi penyimpanan tertentu,
 // (Hal ini mempermudah pindah storage dari in-memory ke database) misalnya.
+// Intinya ini tidak menyimpan data, tidak punya field jadi hanya mendefinisikan saja.
 type ItemCategoryRepository interface {
 	FindAll() ([]entity.ItemCategory, error)
 	FindByID(id int) (entity.ItemCategory, error)
