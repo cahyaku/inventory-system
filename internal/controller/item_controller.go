@@ -184,7 +184,6 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 		selected[realID] = true   // tandai sudah dipilih
 		ids = append(ids, realID) // simpan id kategori
 	}
-
 	return ids, nil
 }
 
