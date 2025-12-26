@@ -12,7 +12,7 @@ type InMemoryCategoryRepository struct {
 }
 
 // NewInMemoryCategoryRepository inisialisasi repository kategori barang (constructor)
-func NewInMemoryCategoryRepository() *InMemoryCategoryRepository {
+func NewInMemoryCategoryRepository() ItemCategoryRepository {
 	// dummy data agar create item bisa jalan
 	return &InMemoryCategoryRepository{
 		categories: []entity.ItemCategory{

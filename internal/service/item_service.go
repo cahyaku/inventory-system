@@ -12,7 +12,10 @@ type ItemService struct {
 	categoryRepo repository.ItemCategoryRepository
 }
 
-func NewItemService(itemRepo repository.ItemRepository, categoryRepo repository.ItemCategoryRepository) *ItemService {
+func NewItemService(
+	itemRepo repository.ItemRepository,
+	categoryRepo repository.ItemCategoryRepository,
+) *ItemService {
 	return &ItemService{itemRepo, categoryRepo}
 }
 

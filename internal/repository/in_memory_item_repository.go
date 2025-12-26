@@ -12,7 +12,7 @@ type InMemoryItemRepository struct {
 }
 
 // NewInMemoryItemRepository inisialisasi repository item (constructor)
-func NewInMemoryItemRepository() *InMemoryItemRepository {
+func NewInMemoryItemRepository() ItemRepository {
 	return &InMemoryItemRepository{
 		items:  []entity.Item{},
 		nextID: 1,

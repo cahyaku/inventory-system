@@ -16,7 +16,8 @@ type CategoryService struct {
 // ini nambah itemRepository untuk cek apakah categori udah dipakai pada items?
 func NewCategoryService(
 	categoryRepository repository.ItemCategoryRepository,
-	itemRepository repository.ItemRepository) *CategoryService {
+	itemRepository repository.ItemRepository,
+) *CategoryService {
 	return &CategoryService{categoryRepository, itemRepository}
 }
 
