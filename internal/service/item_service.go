@@ -117,6 +117,9 @@ func (service *ItemService) Delete(id int) error {
 	return service.itemRepo.Delete(id)
 }
 
+// validateAndGetCategories mengambil kategori berdasarkan ID dan memvalidasi
+// validateAndGetCategories (categoryIDs []int) memvalidasi ID kategori yang dipilih user.
+// []entity.ItemCategory adalah outputnya.
 func (service *ItemService) validateAndGetCategories(categoryIDs []int) ([]entity.ItemCategory, error) {
 	if len(categoryIDs) == 0 {
 		return nil, errors.New("item must have at least one category")
@@ -127,29 +130,34 @@ func (service *ItemService) validateAndGetCategories(categoryIDs []int) ([]entit
 		return nil, err
 	}
 
+	// validasi kategori ada di sistem
 	if len(categories) == 0 {
 		return nil, errors.New("no categories available")
 	}
 
+	// Map untuk menyimpan kategori berdasarkan ID
 	categoryMap := make(map[int]entity.ItemCategory)
 	for _, cat := range categories {
 		categoryMap[cat.ID] = cat
 	}
 
-	// Validate category
-	var selected []entity.ItemCategory
-	seen := make(map[int]bool)
+	// Menyiapkan variabel hasil dan penanda duplikat
+	var selected []entity.ItemCategory // menyimpan kategory yang valid
+	seen := make(map[int]bool)         // menandai id yang usdah diproses
 
+	// loop dan validasi setiap ID dari user
 	for _, id := range categoryIDs {
 		category, exists := categoryMap[id]
+		// jika user memilih ID kategori yang tidak ada
 		if !exists {
 			return nil, errors.New("Invalid category ID: " + strconv.Itoa(id))
 		}
+		// jika user memilih ID kategori yang sudah ada
 		if seen[id] {
 			return nil, errors.New("duplicate category ID: " + strconv.Itoa(id))
 		}
-		seen[id] = true
-		selected = append(selected, category)
+		seen[id] = true                       // tandai ID sudah dipakai
+		selected = append(selected, category) // simpan kategori
 	}
 	return selected, nil
 }

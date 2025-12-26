@@ -9,13 +9,13 @@ import (
 	"strings"
 )
 
-// ItemController handles operations related to managing items and their associated categories.
+// ItemController membuat controller untuk item
 type ItemController struct {
 	itemService     *service.ItemService
 	categoryService *service.CategoryService
 }
 
-// NewItemController initializes and returns a new ItemController with the provided item and category services.
+// NewItemController menginisialisasi controller item (constructor)
 func NewItemController(itemService *service.ItemService, categoryService *service.CategoryService) *ItemController {
 	return &ItemController{
 		itemService:     itemService,
@@ -23,7 +23,7 @@ func NewItemController(itemService *service.ItemService, categoryService *servic
 	}
 }
 
-// ShowItems retrieves and displays all available items. If no items are found, a message is displayed instead.
+// ShowItems menampilkan semua item dan kategori masing-masing.
 func (c *ItemController) ShowItems() {
 	items, _ := c.itemService.GetAllItems()
 
@@ -47,6 +47,7 @@ func (c *ItemController) ShowItems() {
 	utils.PressEnterToContinue()
 }
 
+// CreateItem membuat item baru dengan nama, stock, dan kategori yang dipilih.
 func (c *ItemController) CreateItem() {
 	categories, err := c.categoryService.GetAll()
 	if err != nil || len(categories) == 0 {
@@ -75,6 +76,7 @@ func (c *ItemController) CreateItem() {
 	utils.PressEnterToContinue()
 }
 
+// UpdateItem memperbarui item yang dipilih dengan nama, stock, dan kategori yang dipilih.
 func (c *ItemController) UpdateItem() {
 	item, err := c.selectItem("====== Update Item =====")
 	if err != nil {
@@ -105,6 +107,7 @@ func (c *ItemController) UpdateItem() {
 	utils.PressEnterToContinue()
 }
 
+// DeleteItem menghapus item yang dipilih.
 func (c *ItemController) DeleteItem() {
 	item, err := c.selectItem("====== Delete Item =====")
 	if err != nil {
@@ -128,6 +131,7 @@ func (c *ItemController) DeleteItem() {
 	utils.PressEnterToContinue()
 }
 
+// readCategoryIDs membaca input user untuk memilih kategori.
 func (c *ItemController) readCategoryIDs() ([]int, error) {
 	categories, err := c.categoryService.GetAll()
 	if err != nil {
@@ -140,10 +144,12 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 
 	fmt.Println("---------------------")
 	fmt.Println("Available categories:")
+	// loop tampilkan semua kategori
 	for i, cat := range categories {
 		fmt.Printf("%d. %s\n", i+1, cat.Name)
 	}
 
+	// user memilih kategori nomor
 	input := utils.ReadLine("Select category numbers (comma separated, e.g 1,2,3...): ")
 	parts := strings.Split(input, ",")
 
@@ -151,34 +157,38 @@ func (c *ItemController) readCategoryIDs() ([]int, error) {
 		return nil, fmt.Errorf("you must select at least one category")
 	}
 
+	// menyimpan semua id kategori yang dipilih (id aslinya bukan no urut yang dipilih)
 	var ids []int
+
 	selected := make(map[int]bool) // agar input tidak duplikat
+	// Jadi pada selected key: realID kategori(ex. 5, 8, 12) dengan value true.
 
 	for _, part := range parts {
-		index, err := strconv.Atoi(strings.TrimSpace(part))
+		index, err := strconv.Atoi(strings.TrimSpace(part)) // konversi string ke int
 		if err != nil {
 			return nil, fmt.Errorf("invalid category number: %s", part)
 		}
 
-		// VALIDASI INDEX range
+		// VALIDASI INDEX range (supaya user tidak memasukkan index yang salah => memilih kategori yang tidak ada)
 		if index < 1 || index > len(categories) {
 			return nil, fmt.Errorf("category number %d is out of range", index)
 		}
 
-		realID := categories[index-1].ID
+		realID := categories[index-1].ID // karena user lihat dari 1, sedangkan slice dimulai dari 0
 
 		// Cegah duplikat
 		if selected[realID] {
 			return nil, fmt.Errorf("duplicate category selection: %d", index)
 		}
 
-		selected[realID] = true
-		ids = append(ids, realID)
+		selected[realID] = true   // tandai sudah dipilih
+		ids = append(ids, realID) // simpan id kategori
 	}
 
 	return ids, nil
 }
 
+// selectItem membaca input user untuk memilih item.
 func (c *ItemController) selectItem(prompt string) (*entity.Item, error) {
 	items, err := c.itemService.GetAllItems()
 	if err != nil {
@@ -208,6 +218,7 @@ func (c *ItemController) selectItem(prompt string) (*entity.Item, error) {
 	return &items[index-1], nil
 }
 
+// readItemInput membaca input user untuk membuat item baru.
 func (c *ItemController) readItemInput() (string, int, []int, error) {
 	name := utils.ReadLine("Item name: ")
 	stock := readValidStock()
@@ -216,6 +227,7 @@ func (c *ItemController) readItemInput() (string, int, []int, error) {
 	return name, stock, categoryIDs, nil
 }
 
+// readValidStock membaca input user untuk stock, hanya jika stock >= 0
 func readValidStock() int {
 	for {
 		stock, err := utils.ReadInt("Stock: ")
@@ -226,6 +238,7 @@ func readValidStock() int {
 	}
 }
 
+// readCategoryInput membaca input user untuk memilih kategori.
 func (c *ItemController) readCategoryInput() []int {
 	for {
 		ids, err := c.readCategoryIDs()
